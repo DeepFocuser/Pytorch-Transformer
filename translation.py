@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    jit_number = 10
+    jit_number = 105
 
     if torch.cuda.device_count() > 0 :
         device = torch.device("cuda")
@@ -92,6 +92,8 @@ if __name__ == "__main__":
     with torch.no_grad():
         #translate(net, "Eine Gruppe von Menschen steht vor einem Iglu .", device)
         print(translate(net, "Eine Gruppe von Menschen steht vor einem Iglu .", device))
-        # result :
-        print(translate(net, "Ich leite ein Unternehmen.", device))
-        # result :
+        # result : A group of people standing in front of an igloo
+        # 구글 번역기 : A group of people stands in front of an igloo
+        print(translate(net, "Vor dem Gebäude stehen mehrere Personen.", device))
+        # result : There is several people standing in front of
+        # 구글 번역기 : Several people are standing in front of the building
