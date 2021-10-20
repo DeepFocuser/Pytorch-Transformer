@@ -55,6 +55,8 @@ class Dataset(object):
                                                                        self.vocab_transform[ln],  # Numericalization
                                                                        self.tensor_transform)  # Add BOS/EOS and create tensor
 
+
+        # 이터레이터라서...한번돌면 끝난다..
         self.train_dataset = Multi30k(split='train', language_pair=(self.SRC_LANGUAGE, self.TGT_LANGUAGE))
         self.valid_dataset = Multi30k(split='valid', language_pair=(self.SRC_LANGUAGE, self.TGT_LANGUAGE))
         self.test_dataset = Multi30k(split='test', language_pair=(self.SRC_LANGUAGE, self.TGT_LANGUAGE))

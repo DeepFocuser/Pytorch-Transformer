@@ -170,7 +170,7 @@ def run(epoch=100,
 
     # optimizer
     # https://pytorch.org/docs/master/optim.html?highlight=lr%20sche#torch.optim.lr_scheduler.CosineAnnealingLR
-    unit = 1 if (len(train_dataset) // batch_size) < 1 else len(train_dataset) // batch_size
+    unit = 1 if train_update_number_per_epoch < 1 else train_update_number_per_epoch
     step = unit * decay_step
     lr_sch = lr_scheduler.StepLR(trainer, step, gamma=decay_lr, last_epoch=-1)
 
@@ -185,14 +185,24 @@ def run(epoch=100,
     start_time = time.time()
     for i in tqdm(range(start_epoch + 1, epoch + 1, 1), initial=start_epoch + 1, total=epoch):
 
-        loss_sum = 0
         net.train()
+        loss_sum = 0
         time_stamp = time.time()
+
+        '''
+            Multi30k 데이터셋에 __iter__로 초기화 구현이 안되있어서, 한 epoch 끝날때마다" 
+            dataloader 다시 만들어줘야한다..
+        '''
+        train_dataloader, train_dataset = traindataloader(batch_size=batch_size,
+                                                          pin_memory=pin_memory,
+                                                          num_workers=num_workers)
 
         # multiscale을 하게되면 여기서 train_dataloader을 다시 만드는 것이 좋겠군..
         for batch_count, (src, tgt) in enumerate(
                 train_dataloader,
                 start=1):
+
+            trainer.zero_grad()
 
             src = src.to(context)
             '''
@@ -233,7 +243,6 @@ def run(epoch=100,
             total_loss.backward()
             trainer.step()
             lr_sch.step()
-
             loss_sum += sum(losses)
 
             if batch_count % batch_log == 0:
@@ -270,8 +279,12 @@ def run(epoch=100,
 
         if i % eval_period == 0:
 
-            loss_sum = 0
             net.eval()
+            loss_sum = 0
+
+            valid_dataloader, valid_dataset = validdataloader(batch_size=batch_size,
+                                                              pin_memory=pin_memory,
+                                                              num_workers=num_workers)
 
             for src, tgt in valid_dataloader:
                 src = src.to(context)
