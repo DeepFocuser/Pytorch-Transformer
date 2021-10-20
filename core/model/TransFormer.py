@@ -69,6 +69,29 @@ class DecoderLayer(nn.Module):
         x = self.layernorm3(x + self.dropout3(self.feed_forward(x)))
         return x
 
+
+class Encoders(nn.Module):
+
+    def __init__(self, layers):
+        super(Encoders, self).__init__()
+        self.layers = layers
+
+    def forward(self, x, mask):
+        for layer in self.layers:
+            x = layer(x, mask)
+        return x
+
+class Decoders(nn.Module):
+
+    def __init__(self, layers):
+        super(Decoders, self).__init__()
+        self.layers = layers
+
+    def forward(self, x, from_encoder, src_mask, tgt_mask):
+        for layer in self.layers:
+            x = layer(x, from_encoder, src_mask, tgt_mask)
+        return x
+
 class Transformer(nn.Module):
 
     def __init__(self, src_vocab=50, tgt_vocab=50, d_model=512, nhead=8, num_encoder_layers=6, num_decoder_layers=6,
@@ -79,9 +102,9 @@ class Transformer(nn.Module):
         self.decoder_embedded = Embeddings(d_model=d_model, vocab=tgt_vocab)
         self.encoder_PE = PositionalEncoding(length=src_vocab, d_model=d_model, dropout=dropout)
         self.decoder_PE = PositionalEncoding(length=tgt_vocab, d_model=d_model, dropout=dropout)
+        self.Encoders = Encoders(nn.ModuleList([EncoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout) for _ in range(num_encoder_layers)]))
+        self.Decoders = Decoders(nn.ModuleList([DecoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout) for _ in range(num_decoder_layers)]))
 
-        self.Encoders= nn.ModuleList([EncoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout) for _ in range(num_encoder_layers)])
-        self.Decoders = nn.ModuleList([DecoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout) for _ in range(num_decoder_layers)])
 
         '''
         nn.Linear : 가중치 저정하는 형태가 반대였음.!!! - 주의하기
@@ -101,12 +124,8 @@ class Transformer(nn.Module):
 
         x = self.encoder_PE(self.encoder_embedded(src)) # encoder 입력
         y = self.decoder_PE(self.decoder_embedded(tgt)) # decoder 입력
-
-        for encoder in self.Encoders:
-            x = encoder(x, src_mask)
-        for decoder in self.Decoders:
-            y = decoder(y, x, src_mask, tgt_mask)
-
+        x = self.Encoders(x, src_mask)
+        y = self.Decoders(y, x, src_mask, tgt_mask)
         #return F.softmax(self.output(y), dim=-1)
         return self.output(y) # torch.nn.CrossEntropyLoss 을 사용하므로, raw output을 내보낸다.
 
@@ -154,10 +173,10 @@ if __name__ == "__main__":
     with torch.no_grad():
         output = net(src, tgt, src_mask, tgt_mask)
 
-    script = torch.jit.script(net)
-    script.save("transformer.jit")
-
-    net =torch.jit.load("transformer.jit", map_location=device)
+    # script = torch.jit.script(net)
+    # script.save("transformer.jit")
+    #
+    # net =torch.jit.load("transformer.jit", map_location=device)
     with torch.no_grad():
         output = net(src, tgt, src_mask, tgt_mask)
 
