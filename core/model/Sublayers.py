@@ -45,7 +45,7 @@ class MultiHeadedAttention(nn.Module):
 
         # query shape : (batch size, nhead, sequence length, d_model // nhead)
         # transposed key shape : (batch size, nhead, d_model // nhead, sequence length)
-        # result shape : (batch size, nhead, sequence length, vocab_size)
+        # result shape : (batch size, nhead, sequence length, sequence length)
         attr_score= torch.div(torch.matmul(query, key.transpose(-2, -1)), math.sqrt(d_k))
 
         if mask is not None:

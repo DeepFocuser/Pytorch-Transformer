@@ -139,6 +139,6 @@ if __name__ == "__main__":
     plt.show()
 
     plt.title("decoder mask")
-    plt.imshow(decoder_mask(torch.tensor([[1,2,0,4,6],[1,0,3,4,5]]))[0][0])
+    plt.imshow(decoder_mask(torch.tensor([[3,4,2,3,5,6,11,3,4,1,2,3,6,0]]))[0][0])
     plt.savefig("decoder_mask.png")
     plt.show()
