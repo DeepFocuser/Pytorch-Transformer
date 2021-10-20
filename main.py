@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import yaml
 
@@ -72,3 +74,5 @@ if __name__ == "__main__":
                   weight_decay=weight_decay,
                   GPU_COUNT=GPU_COUNT,
                   eval_period=eval_period)
+    else:
+        logging.info(f"training = {training} 입니다.")

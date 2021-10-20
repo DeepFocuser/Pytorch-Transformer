@@ -22,7 +22,7 @@ hyperparameters:
   # https://pytorch.org/docs/stable/data.html#dataset-types 를 나중에 자세히 읽어보자
   num_workers: 8 # 실제 코드상에서는 0 고정해놓음
   optimizer: ADAM # ADAM, RMSPROP
-  learning_rate: 0.01
+  learning_rate: 0.001
   weight_decay: 0.000001
   decay_lr: 0.99
   decay_step: 10 # 몇 epoch이 지난후 decay_lr을 적용할지
