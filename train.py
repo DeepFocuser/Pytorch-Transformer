@@ -217,7 +217,6 @@ def run(epoch=100,
             tgt_split = torch.split(tgt, chunk, dim=0)
 
             losses = []
-            total_loss = 0.0
 
             for src_part_input, tgt_part in zip(
                     src_split,
@@ -236,11 +235,9 @@ def run(epoch=100,
 
                 # sequence를 batch 쪽으로 합쳐서 계산.
                 loss = torch.div(CELoss(pred.reshape(-1, train_dataset.TGT_VOCAB_SIZE), tgt_part_out.reshape(-1)), subdivision)
+                loss.backward()
                 losses.append(loss.item())
 
-                total_loss = total_loss + loss
-
-            total_loss.backward()
             trainer.step()
             lr_sch.step()
             loss_sum += sum(losses)
